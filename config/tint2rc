@@ -1,0 +1,124 @@
+# Background 1: Panel (Clean light silver/gray)
+rounded = 0
+border_width = 1
+border_sides = B
+background_color = #f1f3f4 100
+border_color = #dadce0 100
+
+# Background 2: Inactive / Regular Task (White button with blue border)
+rounded = 4
+border_width = 1
+border_sides = TBLR
+background_color = #ffffff 100
+border_color = #1a73e8 100
+background_color_hover = #e8f0fe 100
+border_color_hover = #1a73e8 100
+
+# Background 3: Active Task (Google Blue with dark border)
+rounded = 4
+border_width = 1
+border_sides = TBLR
+background_color = #1a73e8 100
+border_color = #1557b0 100
+background_color_hover = #174ea6 100
+border_color_hover = #1557b0 100
+
+# Background 4: Iconified / Minimized Task (Bright Yellow/Orange - HIGH VISIBILITY!)
+rounded = 4
+border_width = 2
+border_sides = TBLR
+background_color = #fff3cd 100
+border_color = #ffc107 100
+background_color_hover = #ffe8a1 100
+border_color_hover = #e0a800 100
+
+# Background 5: Clock & Tray
+rounded = 4
+border_width = 0
+border_sides = TBLR
+background_color = #e8eaed 100
+border_color = #dadce0 100
+
+# Background 6: Launcher button
+rounded = 4
+border_width = 1
+border_sides = TBLR
+background_color = #ffffff 100
+border_color = #34a853 100
+
+# Panel
+panel_items = LTSC
+panel_size = 100% 38
+panel_margin = 0 0
+panel_padding = 4 2 4
+panel_background_id = 1
+wm_menu = 1
+panel_dock = 0
+panel_position = top center horizontal
+panel_layer = top
+panel_monitor = all
+panel_shrink = 0
+autohide = 0
+strut_policy = follow_size
+panel_window_name = tint2
+disable_transparency = 1
+mouse_effects = 1
+font_shadow = 0
+
+# Taskbar
+taskbar_mode = single_desktop
+taskbar_hide_if_empty = 0
+taskbar_padding = 4 2 4
+taskbar_background_id = 0
+taskbar_name = 0
+taskbar_hide_inactive_tasks = 0
+taskbar_distribute_size = 0
+task_align = left
+
+# Task
+task_text = 1
+task_icon = 1
+task_centered = 0
+task_maximum_size = 280 32
+task_padding = 6 2 4
+task_tooltip = 1
+task_font = Noto Sans CJK TC, Sans 10
+task_font_color = #202124 100
+task_active_font_color = #ffffff 100
+task_iconified_font_color = #856404 100
+task_background_id = 2
+task_active_background_id = 3
+task_urgent_background_id = 4
+task_iconified_background_id = 4
+mouse_left = toggle_iconify
+mouse_middle = none
+mouse_right = close
+mouse_scroll_up = toggle
+mouse_scroll_down = iconify
+
+# Systray
+systray_padding = 4 4 4
+systray_background_id = 5
+systray_sort = ascending
+systray_icon_size = 22
+systray_monitor = 1
+
+# Launcher
+launcher_padding = 4 4 4
+launcher_background_id = 6
+launcher_icon_size = 22
+launcher_tooltip = 1
+launcher_item_app = /usr/share/applications/google-chrome.desktop
+
+# Clock
+time1_format = %H:%M
+time2_format = %m/%d
+clock_font = Sans 9
+clock_font_color = #202124 100
+clock_padding = 6 2
+clock_background_id = 5
+
+# Tooltip
+tooltip_padding = 4 4
+tooltip_background_id = 5
+tooltip_font_color = #202124 100

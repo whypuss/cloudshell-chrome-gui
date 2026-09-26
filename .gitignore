@@ -1,0 +1,10 @@
+# Logs and runtime files
+logs/
+*.log
+url.txt
+*.png
+*.deb
+
+# System files
+.cloudshell/
+.DS_Store

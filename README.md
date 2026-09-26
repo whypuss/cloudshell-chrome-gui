@@ -57,7 +57,7 @@
 在 Cloud Shell 終端機執行以下指令：
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/cloudshell-chrome-gui.git ~/chrome-web
+git clone https://github.com/whypuss/cloudshell-chrome-gui.git ~/chrome-web
 cd ~/chrome-web
 ./install.sh
 ./start.sh

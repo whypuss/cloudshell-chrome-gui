@@ -32,12 +32,17 @@ This skill provides an automated workflow to deploy and maintain an operable, gr
 
 ```
 ~/chrome-web/
-├── quick.sh          # All-in-one smart runner: checks dependencies, restores if reset, outputs URL
-├── install.sh        # Dependency installer (Chrome, Xvfb, noVNC, websockify, tint2, fonts)
-├── start.sh          # Launches background services inside a detached tmux session
-├── stop.sh           # Gracefully terminates all background services
-├── status.sh         # Checks health and outputs current active tunnel URL
-├── run.sh            # Service supervisor executed inside tmux session
+├── quick.sh          # All-in-one runner for Chrome mode (checks dependencies, restores, outputs URL)
+├── start.sh          # Launches Chrome services inside detached tmux session 'chrome-gui'
+├── stop.sh           # Gracefully terminates Chrome background services
+├── status.sh         # Checks health and outputs current active tunnel URL for Chrome
+├── run.sh            # Chrome supervisor executed inside tmux session
+├── quick-desktop.sh  # All-in-one runner for XFCE desktop mode
+├── start-desktop.sh  # Launches XFCE desktop inside detached tmux session 'desktop-gui'
+├── stop-desktop.sh   # Gracefully terminates XFCE desktop services
+├── status-desktop.sh # Checks health and outputs current active tunnel URL for XFCE
+├── run-desktop.sh    # XFCE desktop supervisor executed inside tmux session
+├── install.sh        # Dependency installer (Chrome, XFCE4, Xvfb, noVNC, websockify, tint2, fonts)
 ├── tint2rc           # Custom light-theme top panel configuration
 └── cloudflared       # Static binary for Cloudflare Tunnel
 ```
@@ -97,6 +102,7 @@ DISPLAY=:1 wmctrl -r "Google Chrome" -b add,maximized_vert,maximized_horz
 | Issue | Root Cause | Solution |
 | :--- | :--- | :--- |
 | **"Connection Failed" / Loop on Web Preview** | Cloud Shell Web Preview drops WebSockets. | Use the Cloudflare Tunnel URL printed by `status.sh` or `quick.sh`. |
+| **Old `trycloudflare.com` URL unreachable** | Quick Tunnels generate ephemeral URLs; old URLs expire on restart. | Re-run `status.sh` (or `chrome` / `desktop`) to get the latest active URL. |
 | **Window minimized and vanished** | User clicked `-` (minimize) with no taskbar. | Click the yellow button on the top `tint2` panel or run `wmctrl -a "Google Chrome"`. |
 | **Processes died on terminal exit** | Child processes received SIGHUP. | Always run services inside a detached `tmux` session (`start.sh`). |
 | **Yellow `--no-sandbox` warning** | Chrome displays security banner when run unsandboxed. | Pass `--test-type` alongside `--no-sandbox` to suppress the banner. |

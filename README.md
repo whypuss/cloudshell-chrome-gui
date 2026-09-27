@@ -60,28 +60,45 @@
 git clone https://github.com/whypuss/cloudshell-chrome-gui.git ~/chrome-web
 cd ~/chrome-web
 ./install.sh
-./start.sh
 ```
 
-### 2. 獲取連線網址
-執行：
-```bash
-./status.sh
-```
-終端機將會顯示一組專屬的 Cloudflare 安全連線網址，例如：
+### 2. 選擇啟動模式
+
+本專案支援兩種運行模式：
+
+* **模式 A：Chrome 專用模式（輕量推薦）**
+  ```bash
+  ./start.sh
+  ./status.sh
+  # 或直接輸入快捷指令：
+  chrome
+  ```
+  極簡 Openbox 視窗管理員 + 頂部防呆導航列，直開 Google Chrome，資源佔用極低。
+
+* **模式 B：XFCE 完整桌面模式**
+  ```bash
+  ./start-desktop.sh
+  ./status-desktop.sh
+  # 或直接輸入快捷指令：
+  desktop
+  ```
+  包含桌面圖示（Chrome、檔案管理器、終端機）、工作列與完整應用選單。
+
+### 3. 獲取連線網址
+執行 `./status.sh` 或輸入 `chrome` / `desktop`，終端機將會顯示一組專屬的 Cloudflare 安全連線網址，例如：
 `https://xxxx-xxxx.trycloudflare.com`
 
-**直接在您的瀏覽器點開此網址，即可開始用滑鼠操作 Chrome！**
+**直接在您的本機瀏覽器點開此網址，即可開始用滑鼠操作！**
 
 ---
 
 ## ⚡ 斷線後如何一鍵恢復？
 
 在 Cloud Shell 中輸入單一指令：
-```bash
-chrome
-```
-* **伺服器仍在運行時**：1 秒內立刻印出當前的連線網址。
+* 恢復 Chrome 模式：`chrome`
+* 恢復 XFCE 桌面模式：`desktop`
+
+* **伺服器仍在運行時**：1 秒內立刻印出當前的最新連線網址。
 * **伺服器閒置重置後**：自動重新部署環境（約 30 秒）並建立全新通道，自動印出可用網址。
 
 ---
@@ -90,12 +107,17 @@ chrome
 
 | 檔案 | 說明 |
 | :--- | :--- |
-| `quick.sh` | 智慧一鍵啟動與恢復器（綁定 `chrome` 指令） |
-| `install.sh` | 自動安裝 Chrome、Xvfb、noVNC、中文字型與工具列 |
-| `start.sh` | 在獨立的 tmux 背景工作階段中啟動所有服務 |
-| `stop.sh` | 安全終止所有背景服務並釋放連接埠 |
-| `status.sh` | 檢查目前運行狀態並輸出公開連線網址 |
-| `run.sh` | 守護進程，負責維持虛擬螢幕、工具列與 Chrome 運行 |
+| `quick.sh` | Chrome 模式一鍵啟動與恢復器（綁定 `chrome` 指令） |
+| `start.sh` | 在 tmux 背景中啟動 Chrome 專用環境 |
+| `stop.sh` | 終止 Chrome 服務並釋放連接埠 |
+| `status.sh` | 檢查 Chrome 運行狀態並輸出最新公開連線網址 |
+| `run.sh` | Chrome 模式守護進程（Xvfb + Openbox + tint2 + x11vnc + websockify + tunnel） |
+| `quick-desktop.sh` | XFCE 完整桌面一鍵啟動與恢復器（綁定 `desktop` 指令） |
+| `start-desktop.sh` | 在 tmux 背景中啟動 XFCE 完整桌面環境 |
+| `stop-desktop.sh` | 終止 XFCE 桌面服務並釋放連接埠 |
+| `status-desktop.sh` | 檢查 XFCE 桌面運行狀態並輸出最新公開連線網址 |
+| `run-desktop.sh` | XFCE 桌面模式守護進程（Xvfb + XFCE4 Session + x11vnc + websockify + tunnel） |
+| `install.sh` | 自動安裝 Chrome、XFCE、Xvfb、noVNC、中文字型與頂部工具列 |
 | `config/tint2rc` | 客製化頂部導航列設定檔（淺色系、防遮擋、縮小變黃提示） |
 | `SKILL.md` | Antigravity / Gemini CLI Agent 專用 Skill 擴充定義檔 |
 
@@ -103,14 +125,18 @@ chrome
 
 ## 💡 常見問題 (FAQ)
 
-### Q1：為什麼不能直接用 Cloud Shell 的「網頁預覽 (Web Preview)」？
+### Q1：為什麼點擊之前的 `trycloudflare.com` 網址打不開了？
+> **原因**：Cloudflare 免費快速通道（Quick Tunnel）屬於臨時動態服務。**每次重啟腳本或 Cloud Shell 重新連線時，Cloudflare 都會隨機分配一個全新的專屬網址，舊網址會自動失效**。  
+> **解法**：請在終端機輸入 `chrome` 或 `desktop`（或執行 `status.sh`），點擊畫面中顯示的**當前最新網址**連線即可。
+
+### Q2：為什麼不能直接用 Cloud Shell 的「網頁預覽 (Web Preview)」？
 > **原因**：Cloud Shell 的 Web Preview 底層是純 HTTP 反向代理，會阻擋或切斷 WebSocket (`wss://`) 協定。而遠端桌面必須依賴 WebSocket 傳輸即時畫面與滑鼠鍵盤訊號。本專案透過 Cloudflare Tunnel 完美解決此協定限制。
 
-### Q2：不小心把 Chrome 縮小了怎麼辦？
-> **解法**：看螢幕最上方的淺灰色工具列，縮小時按鈕會呈現**超醒目的金黃色**，用滑鼠點擊該按鈕即可立即還原視窗！
+### Q3：不小心把 Chrome 縮小了怎麼辦？
+> **解法**：在 Chrome 模式下看螢幕最上方的淺灰色工具列，縮小時按鈕會呈現**超醒目的金黃色**，用滑鼠點擊該按鈕即可立即還原視窗！在 XFCE 模式下則可點擊下方工作列恢復。
 
-### Q3：如何讓連線網址永久固定不變？
-> 目前預設使用的是免註冊的 Cloudflare 快速通道（每次重啟分配新隨機網址）。如果您有自己的 Cloudflare 帳號或網域，可在 Cloudflare Zero Trust 建立 Named Tunnel，將 Token 填入 `run.sh`，即可享有永久固定的自訂網址（例如 `chrome.yourdomain.com`）。
+### Q4：如何讓連線網址永久固定不變？
+> 目前預設使用的是免註冊的 Cloudflare 快速通道（每次重啟分配新隨機網址）。如果您有自己的 Cloudflare 帳號或網域，可在 Cloudflare Zero Trust 建立 Named Tunnel，將 Token 填入 `run.sh` / `run-desktop.sh`，即可享有永久固定的自訂網址（例如 `chrome.yourdomain.com`）。
 
 ---
 

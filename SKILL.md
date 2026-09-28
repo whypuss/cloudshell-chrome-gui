@@ -2,7 +2,7 @@
 name: cloudshell-chrome-gui
 description: >-
   Installs, configures, and manages a fully interactive Google Chrome GUI browser
-  accessible via web browser using noVNC, Openbox, tint2, and Cloudflare Tunnel.
+  accessible via web browser using noVNC, Openbox, tint2, Cloudflare Tunnel, and Pinggy.
   Specifically optimized for headless Linux environments like Google Cloud Shell.
 ---
 
@@ -22,9 +22,12 @@ This skill provides an automated workflow to deploy and maintain an operable, gr
 4. **VNC & HTML5 Streaming (`x11vnc` + `websockify` + `noVNC`)**:
    - Bridges the X11 display to a local RFB server on port 5900.
    - Exposes noVNC via WebSocket proxy on port 8080 with auto-connect and responsive viewport scaling.
-5. **Secure Edge Tunnel (`cloudflared`)**:
-   - **Critical Problem Solved**: Google Cloud Shell's built-in Web Preview (`*.cloudshell.dev`) blocks or drops WebSocket protocol upgrade handshakes (`Connection: Upgrade`).
-   - Cloudflare Tunnel creates an encrypted outbound tunnel directly to Cloudflare edge nodes, providing native, uninterrupted WebSocket support without port forwarding or Google OAuth redirection loops.
+5. **Dual Edge Tunnels (`cloudflared` + `pinggy`)**:
+   - **Primary Tunnel (Cloudflare)**: Outbound tunnel via HTTP/2 to Cloudflare edge nodes, offering unlimited duration without authentication.
+   - **Backup Zero-delay Tunnel (Pinggy)**: Instant wildcard SSH reverse tunnel with pre-propagated DNS, eliminating initial negative DNS cache delays.
+   - **Pre-flight Probe Verification**: Scripts strictly verify edge registration and HTTP reachability before returning URLs, preventing client-side `ERR_NAME_NOT_RESOLVED` and timeout errors.
+6. **Chrome Profile Lock Protection**:
+   - Automatically cleans up `~/.config/google-chrome/Singleton*` locks on startup to prevent multi-host lockouts after Cloud Shell container reboots.
 
 ---
 
@@ -35,16 +38,16 @@ This skill provides an automated workflow to deploy and maintain an operable, gr
 ├── quick.sh          # All-in-one runner for Chrome mode (checks dependencies, restores, outputs URL)
 ├── start.sh          # Launches Chrome services inside detached tmux session 'chrome-gui'
 ├── stop.sh           # Gracefully terminates Chrome background services
-├── status.sh         # Checks health and outputs current active tunnel URL for Chrome
+├── status.sh         # Checks health and outputs verified active tunnel URLs for Chrome
 ├── run.sh            # Chrome supervisor executed inside tmux session
 ├── quick-desktop.sh  # All-in-one runner for XFCE desktop mode
 ├── start-desktop.sh  # Launches XFCE desktop inside detached tmux session 'desktop-gui'
 ├── stop-desktop.sh   # Gracefully terminates XFCE desktop services
-├── status-desktop.sh # Checks health and outputs current active tunnel URL for XFCE
+├── status-desktop.sh # Checks health and outputs verified active tunnel URLs for XFCE
 ├── run-desktop.sh    # XFCE desktop supervisor executed inside tmux session
-├── install.sh        # Dependency installer (Chrome, XFCE4, Xvfb, noVNC, websockify, tint2, fonts)
-├── tint2rc           # Custom light-theme top panel configuration
-└── cloudflared       # Static binary for Cloudflare Tunnel
+├── install.sh        # Dependency installer (Chrome, XFCE4, Xvfb, noVNC, websockify, tint2, cloudflared)
+├── config/tint2rc    # Custom light-theme top panel configuration
+└── cloudflared       # Auto-downloaded static binary for Cloudflare Tunnel
 ```
 
 ---
@@ -53,33 +56,28 @@ This skill provides an automated workflow to deploy and maintain an operable, gr
 
 ### 1. Initial Installation & Deployment
 
-Run the installer followed by the start script:
+Run the installer followed by the start script (or simply run `chrome`):
 
 ```bash
 ~/chrome-web/install.sh
-~/chrome-web/start.sh
-```
-
-Wait ~5 seconds, then check the generated URL:
-
-```bash
-~/chrome-web/status.sh
+chrome
 ```
 
 ### 2. Fast Recovery (Ephemeral Reset Recovery)
 
 Because Google Cloud Shell instances are ephemeral, system-level packages installed in root (`/`) are reset after extended idle periods, whereas `/home` persists.
 
-Run `quick.sh` or the `chrome` command:
+Run `chrome` (or `desktop` for XFCE):
 
 ```bash
 chrome
 ```
 
 The script will:
-- Detect missing system packages and reinstall them from cached packages in `/home/kconger867/chrome-web/` (~30 seconds).
+- Detect missing system packages and reinstall them (~30 seconds).
+- Clean up any stale `SingletonLock` from previous hostnames.
 - Re-launch the virtual display, window manager, top panel, and Chrome supervisor.
-- Establish a fresh tunnel and output the active connection URL.
+- Establish edge tunnels and output only verified, reachable connection URLs.
 
 ### 3. Window Minimization & Restoration
 
@@ -101,8 +99,8 @@ DISPLAY=:1 wmctrl -r "Google Chrome" -b add,maximized_vert,maximized_horz
 
 | Issue | Root Cause | Solution |
 | :--- | :--- | :--- |
-| **"Connection Failed" / Loop on Web Preview** | Cloud Shell Web Preview drops WebSockets. | Use the Cloudflare Tunnel URL printed by `status.sh` or `quick.sh`. |
-| **Old `trycloudflare.com` URL unreachable** | Quick Tunnels generate ephemeral URLs; old URLs expire on restart. | Re-run `status.sh` (or `chrome` / `desktop`) to get the latest active URL. |
+| **"Connection Failed" / Loop on Web Preview** | Cloud Shell Web Preview drops WebSockets. | Use the Cloudflare Tunnel or Pinggy URL printed by `status.sh` or `quick.sh`. |
+| **Old URL unreachable** | Quick Tunnels generate ephemeral URLs; old URLs expire on restart. | Run `chrome` or `status.sh` to get the latest verified URL. |
+| **ERR_NAME_NOT_RESOLVED / Timeout on first click** | Old script returned URL before Cloudflare edge DNS propagated. | Resolved in v2 with pre-flight HTTP probing and Pinggy zero-delay backup link. |
 | **Window minimized and vanished** | User clicked `-` (minimize) with no taskbar. | Click the yellow button on the top `tint2` panel or run `wmctrl -a "Google Chrome"`. |
-| **Processes died on terminal exit** | Child processes received SIGHUP. | Always run services inside a detached `tmux` session (`start.sh`). |
-| **Yellow `--no-sandbox` warning** | Chrome displays security banner when run unsandboxed. | Pass `--test-type` alongside `--no-sandbox` to suppress the banner. |
+| **Chrome refuses to start after container restart** | Ephemeral hostname changed while persistent disk kept old `SingletonLock`. | Automatically cleared on service start. |

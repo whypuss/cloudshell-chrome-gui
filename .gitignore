@@ -1,9 +1,10 @@
 # Logs and runtime files
 logs/
 *.log
-url.txt
+url*.txt
 *.png
 *.deb
+cloudflared
 
 # System files
 .cloudshell/
